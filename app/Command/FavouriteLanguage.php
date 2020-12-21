@@ -12,15 +12,20 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class FavouriteLanguage extends Command
 {
+    const NEW_LINE = "\n";
+
     private $requireGithubUser = true;
 
-    private string $name = 'github:favourite_langugage';
+    private string $name = 'github:favourite_language';
 
     private Repository $repository;
+
+    private $byByteCodeType;
 
     public function __construct(
         Stats $stats,
@@ -32,6 +37,7 @@ class FavouriteLanguage extends Command
         $this->stats      = $stats;
         $this->repository = $repository;
         $this->language   = $language;
+        $this->byByteCodeType = false;
     }
 
     protected function configure()
@@ -41,20 +47,20 @@ class FavouriteLanguage extends Command
             $this->requireGithubUser ? InputArgument::REQUIRED : InputArgument::OPTIONAL,
             'GitHub User'
         );
-
-        $this->byType = 'byteCode';
+        
+        $this->addOption('useByteCodeCount', 'b', InputOption::VALUE_OPTIONAL, '', false);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $owner = $input->getArgument('user');
+        $this->byByteCodeType = $input->getOption('useByteCodeCount');
 
-        $output->writeln('Fetching user repositories');
-        $output->writeln('');
+
+        $output->writeln('Fetching user repositories' . self::NEW_LINE);
         $repositories = $this->repository->getAll($owner);
 
-        $output->writeln('Fetching user repositories languages');
-        $output->writeln('');
+        $output->writeln('Fetching user repositories languages' . self::NEW_LINE);
         $progressBar = new ProgressBar($output, $repositories->count());
 
         $progressBar->start();
@@ -65,12 +71,11 @@ class FavouriteLanguage extends Command
             $progressBar->advance();
         }
         $progressBar->finish();
-        $output->writeln('');
-        $output->writeln('');
+        $output->writeln(self::NEW_LINE);
 
         $output->writeln('Languages');
         $output->writeln('');
-        if ($this->byType === 'byteCode') {
+        if ($this->byByteCodeType) {
             $stats = $this->stats->byByteCode($repositories);
             $headers = ['Language', 'Bytes Of Code'];
         } else {
@@ -85,8 +90,7 @@ class FavouriteLanguage extends Command
             ->setRows($stats->asArray());
         $table->render();
 
-        $output->writeln('Your favourite language is ' . $stats->mostPopular());
-        $output->writeln('');
+        $output->writeln('Your favourite language is ' . $stats->mostPopular() . self::NEW_LINE);
 
         return Command::SUCCESS;
     }
