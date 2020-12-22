@@ -14,7 +14,6 @@ class UserTest extends TestCase
     public function setUp(): void
     {
         $this->client = $this->createMock(Client::class);
-        
     }
 
     public function testConstruction(): void

@@ -51,7 +51,7 @@ class FavouriteLanguage extends Command
         $this->addOption('useByteCodeCount', 'b', InputOption::VALUE_OPTIONAL, '', false);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $owner = $input->getArgument('user');
         $this->byByteCodeType = $input->getOption('useByteCodeCount');
@@ -73,8 +73,7 @@ class FavouriteLanguage extends Command
         $progressBar->finish();
         $output->writeln(self::NEW_LINE);
 
-        $output->writeln('Languages');
-        $output->writeln('');
+        $output->writeln('Languages' . self::NEW_LINE);
         if ($this->byByteCodeType) {
             $stats = $this->stats->byByteCode($repositories);
             $headers = ['Language', 'Bytes Of Code'];
